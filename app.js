@@ -140,6 +140,7 @@
       name,
       url,
       logo: attrs['tvg-logo'] || '',
+      tvgId: id,
       country: cc.toLowerCase(),
       groups,
       quality,
@@ -153,11 +154,11 @@
   // Channels that are free to watch, but only in the broadcaster's own player: their streams
   // need a per-viewer session, so they can't play here. Picking one offers a link to the site.
   const WEB_CHANNELS = [
-    { name: 'Kanal 2', page: 'https://duoplay.ee/', country: 'ee', groups: ['General'] },
-    { name: 'Duo 3', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'] },
-    { name: 'Duo 4', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'] },
-    { name: 'Duo 5', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'] },
-    { name: 'Duo 6', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'] },
+    { name: 'Kanal 2', page: 'https://duoplay.ee/', country: 'ee', groups: ['General'], tvgId: 'Kanal2.ee@SD' },
+    { name: 'Duo 3', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'], tvgId: 'Duo3.ee@SD' },
+    { name: 'Duo 4', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'], tvgId: 'Duo4.ee@SD' },
+    { name: 'Duo 5', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'], tvgId: 'Duo5.ee@SD' },
+    { name: 'Duo 6', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'], tvgId: 'Duo6.ee@SD' },
     { name: 'Duo 7', page: 'https://duoplay.ee/', country: 'ee', groups: ['General'] },
   ];
 
@@ -168,6 +169,7 @@
       // Several channels share one site, so key them by name (favorites and recents use this).
       url: `web:${w.country}/${w.name.toLowerCase().replace(/\s+/g, '-')}`,
       site,
+      tvgId: w.tvgId || '',
       logo: '',
       quality: '',
       tags: [],
@@ -572,6 +574,7 @@
     const logo = $('npLogo');
     if (c && c.logo) { logo.src = c.logo; logo.hidden = false; logo.onerror = () => { logo.hidden = true; }; }
     else logo.hidden = true;
+    updateGuide();
     favBtn.disabled = !c;
     const on = c && favorites.has(c.url);
     favBtn.classList.toggle('on', !!on);
@@ -591,6 +594,140 @@
     const li = listEl.children[idx];
     if (li && window.matchMedia('(min-width: 861px)').matches) li.scrollIntoView({ block: 'nearest' });
   }
+
+  // ---------- TV guide (now / next) ----------
+  // guide/ is built every few hours by the Pages workflow for the channels in
+  // epg/channels.xml (see scripts/build-guide.mjs). Channels without a schedule show nothing.
+  const GUIDE_URL = 'guide/';
+  const GUIDE_MAX_AGE_MS = 3 * 60 * 60 * 1000;
+  const GUIDE_LIST_MAX = 40;
+  let guideIndex = null;          // Promise<Map tvg-id -> file>
+  const guideFiles = new Map();   // file -> { at, promise }
+  let guideTimer = null;
+
+  function loadGuideIndex() {
+    if (!guideIndex) {
+      guideIndex = fetch(GUIDE_URL + 'index.json')
+        .then((r) => (r.ok ? r.json() : {}))
+        .then((j) => {
+          const map = new Map();
+          for (const [id, file] of Object.entries(j.channels || {})) {
+            map.set(id, file);
+            // Other feeds of the same channel (ESPNU.us@HD vs @SD) share its schedule.
+            const base = id.split('@')[0];
+            if (!map.has(base)) map.set(base, file);
+          }
+          return map;
+        })
+        .catch(() => { guideIndex = null; return new Map(); });
+    }
+    return guideIndex;
+  }
+
+  async function guideFor(c) {
+    if (!c.tvgId) return null;
+    const index = await loadGuideIndex();
+    const file = index.get(c.tvgId) || index.get(c.tvgId.split('@')[0]);
+    if (!file) return null;
+    let hit = guideFiles.get(file);
+    if (!hit || Date.now() - hit.at > GUIDE_MAX_AGE_MS) {
+      hit = {
+        at: Date.now(),
+        promise: fetch(GUIDE_URL + encodeURIComponent(file))
+          .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then((j) => j.programmes || [])
+          .catch(() => { guideFiles.delete(file); return null; }),
+      };
+      guideFiles.set(file, hit);
+    }
+    return hit.promise;
+  }
+
+  const fmtTime = (s) => new Date(s * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+  function dayLabel(s) {
+    const d = new Date(s * 1000);
+    const today = new Date();
+    const days = Math.round((new Date(d).setHours(0, 0, 0, 0) - new Date(today).setHours(0, 0, 0, 0)) / 86400000);
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Tomorrow';
+    return d.toLocaleDateString([], { weekday: 'long', day: 'numeric', month: 'short' });
+  }
+
+  function guideTitle(p) {
+    return el('span', { className: 'guide-title', title: [p.t, p.st].filter(Boolean).join(' · ') },
+      p.t, p.st ? el('span', { className: 'guide-sub', textContent: ` · ${p.st}` }) : '');
+  }
+
+  async function updateGuide() {
+    clearTimeout(guideTimer);
+    const c = current;
+    const box = $('guide');
+    const list = c ? await guideFor(c) : null;
+    if (c !== current) return; // switched channel while loading
+    const nowS = Date.now() / 1000;
+    const upcoming = (list || []).filter((p) => p.e > nowS);
+    box.hidden = !upcoming.length;
+    if (!upcoming.length) return;
+    box.classList.toggle('open', !!prefs.guideOpen);
+
+    const onNow = upcoming[0].s <= nowS ? upcoming[0] : null;
+    const later = onNow ? upcoming.slice(1) : upcoming;
+    const nowEl = $('guideNow');
+    nowEl.hidden = !onNow;
+    if (onNow) {
+      const pct = Math.min(100, Math.max(0, ((nowS - onNow.s) / (onNow.e - onNow.s)) * 100));
+      const left = Math.max(1, Math.round((onNow.e - nowS) / 60));
+      const bar = el('div', { className: 'guide-bar', role: 'progressbar', ariaValueNow: Math.round(pct), ariaValueMin: 0, ariaValueMax: 100, ariaLabel: 'Progress' },
+        el('span'));
+      bar.firstChild.style.width = pct.toFixed(1) + '%';
+      nowEl.replaceChildren(
+        el('div', { className: 'guide-row' },
+          el('span', { className: 'guide-label', textContent: 'Now' }),
+          guideTitle(onNow),
+          el('span', { className: 'guide-time', textContent: `${fmtTime(onNow.s)}–${fmtTime(onNow.e)}` })),
+        bar,
+        el('div', { className: 'guide-left', textContent: [`${left} min left`, onNow.c].filter(Boolean).join(' · ') }),
+        onNow.d ? el('p', { className: 'guide-desc', textContent: onNow.d }) : '');
+    }
+
+    const next = later[0];
+    const nextEl = $('guideNext');
+    nextEl.hidden = !next;
+    if (next) {
+      const day = dayLabel(next.s);
+      nextEl.replaceChildren(el('div', { className: 'guide-row' },
+        el('span', { className: 'guide-label', textContent: 'Next' }),
+        guideTitle(next),
+        el('span', { className: 'guide-time', textContent: (day === 'Today' ? '' : day + ' ') + fmtTime(next.s) })));
+    }
+
+    const more = later.slice(1, GUIDE_LIST_MAX + 1);
+    $('guideMore').hidden = !more.length;
+    const scheduleEl = $('guideList');
+    scheduleEl.hidden = !more.length || !prefs.guideOpen;
+    $('guideMore').setAttribute('aria-expanded', String(!scheduleEl.hidden));
+    let lastDay = dayLabel(next ? next.s : nowS);
+    scheduleEl.replaceChildren(...more.flatMap((p) => {
+      const day = dayLabel(p.s);
+      const items = [];
+      if (day !== lastDay) { items.push(el('li', { className: 'guide-day', textContent: day })); lastDay = day; }
+      items.push(el('li', { className: 'guide-item' },
+        el('span', { className: 'guide-time', textContent: fmtTime(p.s) }), guideTitle(p)));
+      return items;
+    }));
+
+    // Keep the progress bar moving and roll over to the next show when this one ends.
+    const untilChange = ((onNow ? onNow.e : upcoming[0].s) - nowS) * 1000;
+    guideTimer = setTimeout(updateGuide, Math.max(1000, Math.min(60000, untilChange + 500)));
+  }
+
+  $('guideMore').addEventListener('click', () => {
+    prefs.guideOpen = !prefs.guideOpen;
+    savePrefs();
+    updateGuide();
+  });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) updateGuide(); });
 
   function flashOsd(text) {
     osd.textContent = text;

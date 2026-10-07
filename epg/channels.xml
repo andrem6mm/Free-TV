@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Channels that get a TV schedule (now / next) in Free TV.
+
+  The "Update TV guide" step of the Pages workflow downloads these schedules with the
+  iptv-org/epg grabber (https://github.com/iptv-org/epg) and turns them into small JSON
+  files under guide/. To add a channel, find it in one of the sites/<site>/*.channels.xml
+  files of that repository and copy the line here. Set xmltv_id to the channel's tvg-id in
+  the playlist (the part before "@" is enough to match other feeds of the same channel).
+
+  A channel may be listed under more than one site: the site that returns the most
+  programmes wins, so a second site acts as a backup when the first one fails.
+-->
+<channels>
+  <!-- Estonia (Telia TV listings) -->
+  <channel site="teliatv.ee" site_id="et#1" lang="et" xmltv_id="ETV.ee@SD">ETV</channel>
+  <channel site="teliatv.ee" site_id="et#111" lang="et" xmltv_id="ETV2.ee@SD">ETV 2</channel>
+  <channel site="teliatv.ee" site_id="et#1252" lang="et" xmltv_id="ETVPlus.ee@SD">ETV+</channel>
+  <channel site="teliatv.ee" site_id="et#3" lang="et" xmltv_id="Kanal2.ee@SD">Kanal 2</channel>
+  <channel site="teliatv.ee" site_id="et#257" lang="et" xmltv_id="Duo3.ee@SD">Duo 3</channel>
+  <channel site="teliatv.ee" site_id="et#101" lang="et" xmltv_id="Duo4.ee@SD">Duo 4</channel>
+  <channel site="teliatv.ee" site_id="et#728" lang="et" xmltv_id="Duo5.ee@SD">Duo 5</channel>
+  <channel site="teliatv.ee" site_id="et#1080" lang="et" xmltv_id="Duo6.ee@SD">Duo 6</channel>
+  <channel site="teliatv.ee" site_id="et#1086" lang="et" xmltv_id="KidZoneMax.ee@SD">Kidzone Max</channel>
+  <channel site="teliatv.ee" site_id="en#228" lang="en" xmltv_id="Go3Sport1.ee@SD">Go3 Sport 1</channel>
+
+  <!-- USA: football (soccer) -->
+  <channel site="beinsports.com" site_id="1ACADCF1-DFAC-480B-872C-53D51FE1B45D" lang="en" xmltv_id="beINSPORTSXTRA.us@SD">beIN SPORTS XTRA</channel>
+  <channel site="tvtv.us" site_id="113143" lang="en" xmltv_id="beINSPORTSXTRA.us@SD">beIN Sports Xtra USA</channel>
+  <channel site="beinsports.com" site_id="5223E3D7-FB4E-4155-885A-9165996B22FA" lang="es" xmltv_id="beINSPORTSXTRAenEspanol.us@SD">beIN SPORTS XTRA en Español</channel>
+  <channel site="tvtv.us" site_id="122816" lang="en" xmltv_id="beINSPORTSXTRAenEspanol.us@SD">beIN Sports Xtra En Espanol</channel>
+  <channel site="pluto.tv" site_id="63a0e33a45264d000850ed7e" lang="en" xmltv_id="CBSSportsGolazoNetwork.us@SD">CBS Sports Golazo Network</channel>
+  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-6571186d9a46917c0a8f2ddd" lang="en" xmltv_id="CBSSportsGolazoNetwork.us@SD">CBS Sports Golazo Network</channel>
+  <channel site="tvtv.us" site_id="11207" lang="en" xmltv_id="USANetwork.us@East">USA Network</channel>
+  <channel site="tvguide.com" site_id="9233004106" lang="en" xmltv_id="USANetwork.us@East">USA Network</channel>
+  <channel site="tvtv.us" site_id="77033" lang="en" xmltv_id="TUDN.us@SD">TUDN</channel>
+  <channel site="tvtv.us" site_id="15377" lang="en" xmltv_id="FoxDeportes.us@SD">Fox Deportes</channel>
+  <channel site="tvtv.us" site_id="25595" lang="en" xmltv_id="ESPNDeportes.us@HD">ESPN Deportes</channel>
+
+  <!-- USA: multi-sport, basketball (NBA) -->
+  <channel site="tvguide.com" site_id="9233008440" lang="en" xmltv_id="FoxSports1.us@HD">FOX Sports 1</channel>
+  <channel site="tvtv.us" site_id="32281" lang="en" xmltv_id="NBATV.us@SD">NBA TV</channel>
+  <channel site="tvguide.com" site_id="9200000070" lang="en" xmltv_id="NBATV.us@SD">NBA TV</channel>
+  <channel site="tvtv.us" site_id="45654" lang="en" xmltv_id="ESPNU.us@SD">ESPNU</channel>
+  <channel site="tvguide.com" site_id="9233011350" lang="en" xmltv_id="ESPNU.us@SD">ESPNU</channel>
+  <channel site="tvtv.us" site_id="104950" lang="en" xmltv_id="Stadium.us@SD">Stadium</channel>
+  <channel site="pluto.tv" site_id="5e9f2c05172a0f0007db4786" lang="en" xmltv_id="CBSSportsHQ.us@SD">CBS Sports HQ</channel>
+  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-5fc705f68aba71002d8b7b37" lang="en" xmltv_id="FuboSportsNetwork.us@SD">Fubo Sports Network</channel>
+  <channel site="plex.tv" site_id="5fc705f68aba71002d8b7b37" lang="en" xmltv_id="FuboSportsNetwork.us@SD">Fubo Sports Network</channel>
+  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-5fc70600598c41002da3dd43" lang="en" xmltv_id="NBCSportsNOW.us@SD">NBC Sports NOW</channel>
+  <channel site="plex.tv" site_id="5fc70600598c41002da3dd43" lang="en" xmltv_id="NBCSportsNOW.us@SD">NBC Sports NOW</channel>
+
+  <!-- USA: fighting (UFC-style MMA, boxing) -->
+  <channel site="pluto.tv" site_id="6334a574605f140007e233c4" lang="en" xmltv_id="PFLMMA.us@SD">PFL MMA</channel>
+  <channel site="i.mjh.nz" site_id="Plex/au#697140a85d851f5e69414688-643f0ecd76de2b4015ae6c01" lang="en" xmltv_id="PFLMMA.us@SD">PFL MMA</channel>
+  <channel site="pluto.tv" site_id="5ebc8688f3697d00072f7cf8" lang="en" xmltv_id="BellatorMMA.us@SD">Bellator MMA</channel>
+  <channel site="i.mjh.nz" site_id="Roku/all#963092a6c9489bdb5ec99e3c3ede8ad1" lang="en" xmltv_id="BellatorMMA.us@SD">Bellator MMA</channel>
+  <channel site="watchyour.tv" site_id="786" lang="en" xmltv_id="TVSBoxing.us@SD">TVS Boxing</channel>
+
+  <!-- USA: movies -->
+  <channel site="tvtv.us" site_id="10021" lang="en" xmltv_id="AMC.us@EastHD">AMC</channel>
+  <channel site="tvguide.com" site_id="9200004316" lang="en" xmltv_id="SYFY.us@East">SYFY</channel>
+  <channel site="tvtv.us" site_id="14873" lang="en" xmltv_id="IFC.us@East">IFC</channel>
+  <channel site="tvtv.us" site_id="11163" lang="en" xmltv_id="ParamountNetwork.us@East">Paramount Network</channel>
+  <channel site="tvtv.us" site_id="18480" lang="en" xmltv_id="LifetimeMovies.us@East">Lifetime Movies</channel>
+  <channel site="tvtv.us" site_id="19634" lang="en" xmltv_id="StarzCinema.us@East">Starz Cinema</channel>
+  <channel site="tvtv.us" site_id="34901" lang="en" xmltv_id="StarzComedy.us@East">Starz Comedy</channel>
+  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-5fb84bc1b7ad2d002dcb735f" lang="en" xmltv_id="MovieSphere.us@US">MovieSphere</channel>
+  <channel site="xumo.tv" site_id="0#99951251" lang="en" xmltv_id="MovieSphere.us@US">MovieSphere</channel>
+  <channel site="pluto.tv" site_id="628e685ba3811100070551a8" lang="en" xmltv_id="HallmarkMoviesMore.us@SD">Hallmark Movies &amp; More</channel>
+  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-6244cf3c742b0d58cd4f2514" lang="en" xmltv_id="HallmarkMoviesMore.us@SD">Hallmark Movies &amp; More</channel>
+</channels>
