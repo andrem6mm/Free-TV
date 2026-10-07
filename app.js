@@ -150,6 +150,34 @@
     };
   }
 
+  // Channels that are free to watch, but only in the broadcaster's own player: their streams
+  // need a per-viewer session, so they can't play here. Picking one offers a link to the site.
+  const WEB_CHANNELS = [
+    { name: 'Kanal 2', page: 'https://duoplay.ee/', country: 'ee', groups: ['General'] },
+    { name: 'Duo 3', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'] },
+    { name: 'Duo 4', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'] },
+    { name: 'Duo 5', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'] },
+    { name: 'Duo 6', page: 'https://duoplay.ee/', country: 'ee', groups: ['Entertainment'] },
+    { name: 'Duo 7', page: 'https://duoplay.ee/', country: 'ee', groups: ['General'] },
+  ];
+
+  function webChannel(w) {
+    const site = new URL(w.page).hostname.replace(/^www\./, '');
+    return {
+      ...w,
+      // Several channels share one site, so key them by name (favorites and recents use this).
+      url: `web:${w.country}/${w.name.toLowerCase().replace(/\s+/g, '-')}`,
+      site,
+      logo: '',
+      quality: '',
+      tags: [],
+      geo: false,
+      httpOnly: false,
+      web: true,
+      search: (w.name + ' ' + site).toLowerCase(),
+    };
+  }
+
   // ---------- loading ----------
   async function fetchText(url) {
     const ctrl = new AbortController();
@@ -204,6 +232,7 @@
         el('br'), el('br'), retry));
       return;
     }
+    channels = channels.concat(WEB_CHANNELS.map(webChannel));
     byUrl = new Map(channels.map((c) => [c.url, c]));
     buildFilterOptions();
     applyFilters();
@@ -335,7 +364,8 @@
       img.onerror = () => img.remove();
     }
     const ci = c.country ? country(c.country) : null;
-    const meta = [ci && `${ci.flag} ${ci.name}`.trim(), c.groups.join(', '), c.quality, c.geo && 'Geo-blocked', c.httpOnly && 'HTTP']
+    const meta = [ci && `${ci.flag} ${ci.name}`.trim(), c.groups.join(', '), c.quality, c.geo && 'Geo-blocked', c.httpOnly && 'HTTP',
+      c.web && `Watch on ${c.site}`]
       .filter(Boolean).join(' · ');
     const star = el('button', {
       className: 'star' + (favorites.has(c.url) ? ' on' : ''),
@@ -376,13 +406,17 @@
   }
 
   // ---------- playback ----------
-  function showOverlay(text, { spinner = false, actions = false, link = null } = {}) {
+  function showOverlay(text, { spinner = false, actions = false, link = null, page = null } = {}) {
     overlay.hidden = false;
     const box = overlayText;
     box.replaceChildren();
     if (spinner) box.append(el('div', { className: 'spinner' }));
     box.append(text);
     if (link) box.append(linkTools(link));
+    if (page) {
+      box.append(el('div', { className: 'link-tools' }, el('div', { className: 'link-buttons' },
+        el('a', { className: 'btn primary', href: page.url, target: '_blank', rel: 'noopener', textContent: `Watch on ${page.site}` }))));
+    }
     overlayActions.hidden = !actions;
   }
 
@@ -461,8 +495,8 @@
     updateNowPlaying();
     refreshRows();
     scrollToCurrent();
-    // HTTP-only channels can't play here anyway, so go straight to the copy/share/VLC options.
-    if (autoplay || (IS_HTTPS && c.httpOnly)) {
+    // HTTP-only and website-only channels can't play here anyway, so go straight to their options.
+    if (autoplay || c.web || (IS_HTTPS && c.httpOnly)) {
       recent = [c.url, ...recent.filter((u) => u !== c.url)].slice(0, MAX_RECENT);
       store.set('recent', recent);
       play(c);
@@ -470,6 +504,7 @@
       stop();
       showOverlay(`Ready: ${c.name}`, { actions: false });
       overlayActions.hidden = false;
+      $('retryBtn').hidden = false;
       $('retryBtn').textContent = 'Play';
     }
   }
@@ -477,7 +512,15 @@
   function play(c) {
     stop();
     $('retryBtn').textContent = 'Retry';
+    $('retryBtn').hidden = !!c.web;
     triedRecover = false;
+
+    if (c.web) {
+      showOverlay(`${c.name} is free to watch on ${c.site}, in the broadcaster's own player. ` +
+        'You may need a free account there, and it usually only works in Estonia.',
+      { actions: true, page: { url: c.page, site: c.site } });
+      return;
+    }
 
     if (IS_HTTPS && c.httpOnly) {
       showOverlay('This channel only offers an insecure (HTTP) stream, which browsers block on secure pages. You can open it in a player such as VLC instead:',

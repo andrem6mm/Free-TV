@@ -47,6 +47,7 @@ python3 -m http.server 8000
 
 - Free TV doesn't host any streams. It plays links from the public iptv-org playlist, so some channels will be offline, slow, or blocked in your country.
 - Browsers block plain `http://` streams on secure (`https://`) pages, so those channels are hidden by default (Settings → uncheck to show them with a link you can open in VLC).
+- A few channels that are free but only stream in the broadcaster's own player (for now Kanal 2 and the Duo channels on duoplay.ee) are listed with a *Watch on …* button that opens their site. They may need a free account there and usually only work in Estonia. The list is `WEB_CHANNELS` in `app.js`.
 - Some streams don't allow playback from other websites (CORS). These usually work in Safari on iPhone/Mac, or in VLC.
 - You can point the app at any other M3U playlist in **Settings → Playlist URL**, for example a single country: `https://iptv-org.github.io/iptv/countries/us.m3u`.
 
