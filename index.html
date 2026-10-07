@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
   <header class="topbar">
@@ -54,7 +54,7 @@
         <button class="btn icon" id="nextBtn" title="Next channel (↓)" aria-label="Next channel">&#9660;</button>
       </div>
       <p class="hint desktop-only">Keys: ↑/↓ switch channel · type a number to jump · F fullscreen · M mute · / search</p>
-      <p class="hint mobile-only">Swipe left/right on the video to switch channels.</p>
+      <p class="hint mobile-only" id="swipeHint">Swipe left/right on the video to switch channels.</p>
     </section>
 
     <aside class="list-pane" id="listPane">
@@ -69,11 +69,17 @@
         <button class="tab" data-tab="recent" role="tab">Recent</button>
       </div>
       <div class="filters">
-        <input id="search" type="search" placeholder="Search channels…" autocomplete="off">
+        <div class="search-row">
+          <input id="search" type="search" placeholder="Search channels…" autocomplete="off">
+          <select id="country" aria-label="Country"><option value="">All countries</option></select>
+        </div>
         <div class="cats" id="cats" role="group" aria-label="Categories"></div>
-        <select id="country" aria-label="Country"><option value="">All countries</option></select>
-        <details class="settings">
-          <summary>Settings</summary>
+      </div>
+      <div class="count-row">
+        <span class="count" id="count">Loading channels…</span>
+        <button class="link-btn" id="settingsBtn" aria-expanded="false" aria-controls="settings">⚙ Settings</button>
+      </div>
+      <div class="settings" id="settings" hidden>
           <label class="check"><input type="checkbox" id="hideHttp"> Hide channels that can't play on this secure page (HTTP-only)</label>
           <label class="check"><input type="checkbox" id="hideGeo"> Hide geo-blocked channels</label>
           <label class="field">Playlist URL
@@ -83,20 +89,20 @@
             <button class="btn" id="reloadBtn">Reload playlist</button>
             <button class="btn ghost" id="resetUrlBtn">Use default</button>
           </div>
-        </details>
       </div>
-      <div class="count" id="count">Loading channels…</div>
       <ul class="channels" id="channels"></ul>
       <div id="sentinel"></div>
       </div>
     </aside>
   </main>
 
+  <button class="to-top" id="topBtn" aria-label="Back to top of the channel list" hidden>↑ Top</button>
+
   <footer class="footer">
-    Channels from the community-maintained <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org/iptv</a> playlist. Free TV hosts no streams; some may be offline or region-locked. <span class="version">Version 8</span>
+    Channels from the community-maintained <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org/iptv</a> playlist. Free TV hosts no streams; some may be offline or region-locked. <span class="version">Version 9</span>
   </footer>
 
   <script src="vendor/hls.min.js"></script>
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

@@ -221,9 +221,15 @@
       for (const g of c.groups) gCounts.set(g, (gCounts.get(g) || 0) + 1);
     }
     const countries = [...cCounts.keys()].map(country).sort((a, b) => a.name.localeCompare(b.name));
+    const option = (c) => el('option', { value: c.code, textContent: `${c.flag} ${c.name} (${cCounts.get(c.code)})`.trim() });
+    // Quick picks at the top: countries picked before, plus the one the device is set to.
+    const own = (navigator.language || '').split('-')[1]?.toLowerCase();
+    const quick = [...new Set([...(prefs.recentCountries || []), own === 'gb' ? 'uk' : own])]
+      .filter((code) => code && cCounts.has(code)).slice(0, 4);
     countryEl.replaceChildren(
       el('option', { value: '', textContent: 'All countries' }),
-      ...countries.map((c) => el('option', { value: c.code, textContent: `${c.flag} ${c.name} (${cCounts.get(c.code)})`.trim() })),
+      quick.length ? el('optgroup', { label: 'Quick picks' }, ...quick.map((code) => option(country(code)))) : null,
+      el('optgroup', { label: 'All countries' }, ...countries.map(option)),
     );
     countryEl.value = cCounts.has(prefs.country) ? prefs.country : '';
     if (!gCounts.has(prefs.category)) prefs.category = '';
@@ -251,6 +257,7 @@
     rendered = 0;
     listEl.replaceChildren();
     listEl.scrollTop = 0;
+    if (listStartY() < window.scrollY) window.scrollTo({ top: listStartY() });
     if (!view.length) {
       const msg = prefs.tab === 'fav' && !favorites.size ? 'No favorites yet — tap ☆ on a channel to add it.'
         : prefs.tab === 'recent' && !recent.length ? 'Channels you watch will show up here.'
@@ -297,6 +304,30 @@
     const on = catsEl.querySelector('.chip.on');
     if (on && on.offsetTop - catsEl.offsetTop === 0) catsEl.scrollLeft = Math.max(0, on.offsetLeft - catsEl.offsetLeft - 40);
   }
+
+  // ---------- back to top ----------
+  const isDesktop = () => window.matchMedia('(min-width: 861px)').matches;
+  const playerPane = document.querySelector('.player-pane');
+  // Page position at which the channel list's header sits just below the (sticky) player.
+  function listStartY() {
+    if (isDesktop()) return Infinity;
+    const sticky = getComputedStyle(playerPane).position === 'sticky' ? playerPane.offsetHeight : 0;
+    return Math.max(0, $('listPane').getBoundingClientRect().top + window.scrollY - sticky);
+  }
+  const topBtn = $('topBtn');
+  function updateTopBtn() {
+    const away = isDesktop() ? listEl.scrollTop > 500 : window.scrollY > listStartY() + 500;
+    topBtn.hidden = !away || prefs.listCollapsed;
+  }
+  topBtn.addEventListener('click', () => {
+    const smooth = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    if (isDesktop()) listEl.scrollTo({ top: 0, behavior: smooth });
+    else window.scrollTo({ top: listStartY(), behavior: smooth });
+    topBtn.hidden = true;
+  });
+  window.addEventListener('scroll', updateTopBtn, { passive: true });
+  listEl.addEventListener('scroll', updateTopBtn, { passive: true });
+  window.addEventListener('resize', updateTopBtn);
 
   function renderMore() {
     const frag = document.createDocumentFragment();
@@ -435,6 +466,7 @@
 
   function select(c, { autoplay = true } = {}) {
     current = c;
+    document.body.classList.add('has-channel');
     store.set('lastUrl', c.url);
     updateNowPlaying();
     refreshRows();
@@ -541,6 +573,8 @@
     const c = view[idx];
     flashOsd(`${idx + 1}  ${c.name}`);
     select(c);
+    // They've found channel switching, so the swipe tip can go.
+    if (!store.get('hintDone', false)) { store.set('hintDone', true); $('swipeHint').hidden = true; }
   }
 
   function jumpTo(n) {
@@ -568,7 +602,17 @@
 
   let searchTimer;
   searchEl.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(applyFilters, 150); });
-  countryEl.addEventListener('change', () => { prefs.country = countryEl.value; savePrefs(); applyFilters(); });
+  countryEl.addEventListener('change', () => {
+    prefs.country = countryEl.value;
+    if (prefs.country) prefs.recentCountries = [prefs.country, ...(prefs.recentCountries || []).filter((c) => c !== prefs.country)].slice(0, 3);
+    savePrefs();
+    applyFilters();
+  });
+  $('settingsBtn').addEventListener('click', () => {
+    const panel = $('settings');
+    panel.hidden = !panel.hidden;
+    $('settingsBtn').setAttribute('aria-expanded', String(!panel.hidden));
+  });
 
   hideHttpEl.checked = prefs.hideHttp;
   hideGeoEl.checked = prefs.hideGeo;
@@ -652,6 +696,7 @@
     $('listBody').hidden = collapsed;
     $('listToggle').setAttribute('aria-expanded', String(!collapsed));
     $('listToggleText').textContent = collapsed ? 'Show' : 'Hide';
+    updateTopBtn();
   }
   $('listToggle').addEventListener('click', () => {
     const collapse = !prefs.listCollapsed;
@@ -659,6 +704,7 @@
     if (!collapse) scrollToCurrent();
   });
   setListCollapsed(prefs.listCollapsed);
+  $('swipeHint').hidden = store.get('hintDone', false);
 
   // ---------- share the app ----------
   const APP_URL = location.origin + location.pathname;
