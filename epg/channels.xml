@@ -26,28 +26,21 @@
 
   <!-- USA: football (soccer) -->
   <channel site="beinsports.com" site_id="1ACADCF1-DFAC-480B-872C-53D51FE1B45D" lang="en" xmltv_id="beINSPORTSXTRA.us@SD">beIN SPORTS XTRA</channel>
-  <channel site="tvtv.us" site_id="113143" lang="en" xmltv_id="beINSPORTSXTRA.us@SD">beIN Sports Xtra USA</channel>
   <channel site="beinsports.com" site_id="5223E3D7-FB4E-4155-885A-9165996B22FA" lang="es" xmltv_id="beINSPORTSXTRAenEspanol.us@SD">beIN SPORTS XTRA en Español</channel>
-  <channel site="tvtv.us" site_id="122816" lang="en" xmltv_id="beINSPORTSXTRAenEspanol.us@SD">beIN Sports Xtra En Espanol</channel>
   <channel site="pluto.tv" site_id="63a0e33a45264d000850ed7e" lang="en" xmltv_id="CBSSportsGolazoNetwork.us@SD">CBS Sports Golazo Network</channel>
-  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-6571186d9a46917c0a8f2ddd" lang="en" xmltv_id="CBSSportsGolazoNetwork.us@SD">CBS Sports Golazo Network</channel>
-  <channel site="tvtv.us" site_id="11207" lang="en" xmltv_id="USANetwork.us@East">USA Network</channel>
   <channel site="tvguide.com" site_id="9233004106" lang="en" xmltv_id="USANetwork.us@East">USA Network</channel>
-  <channel site="tvtv.us" site_id="77033" lang="en" xmltv_id="TUDN.us@SD">TUDN</channel>
-  <channel site="tvtv.us" site_id="15377" lang="en" xmltv_id="FoxDeportes.us@SD">Fox Deportes</channel>
-  <channel site="tvtv.us" site_id="25595" lang="en" xmltv_id="ESPNDeportes.us@HD">ESPN Deportes</channel>
+  <channel site="gatotv.com" site_id="tudn_estados_unidos" lang="es" xmltv_id="TUDN.us@SD">TUDN</channel>
+  <channel site="tvpassport.com" site_id="fox-deportes-hd/10502" lang="en" xmltv_id="FoxDeportes.us@SD">Fox Deportes</channel>
+  <channel site="gatotv.com" site_id="fox_deportes" lang="es" xmltv_id="FoxDeportes.us@SD">Fox Deportes</channel>
+  <channel site="gatotv.com" site_id="espn_deportes" lang="es" xmltv_id="ESPNDeportes.us@HD">ESPN Deportes</channel>
 
   <!-- USA: multi-sport, basketball (NBA) -->
   <channel site="tvguide.com" site_id="9233008440" lang="en" xmltv_id="FoxSports1.us@HD">FOX Sports 1</channel>
-  <channel site="tvtv.us" site_id="32281" lang="en" xmltv_id="NBATV.us@SD">NBA TV</channel>
   <channel site="tvguide.com" site_id="9200000070" lang="en" xmltv_id="NBATV.us@SD">NBA TV</channel>
-  <channel site="tvtv.us" site_id="45654" lang="en" xmltv_id="ESPNU.us@SD">ESPNU</channel>
   <channel site="tvguide.com" site_id="9233011350" lang="en" xmltv_id="ESPNU.us@SD">ESPNU</channel>
-  <channel site="tvtv.us" site_id="104950" lang="en" xmltv_id="Stadium.us@SD">Stadium</channel>
+  <channel site="plex.tv" site_id="5f6142d2fc6ce20041ec3c92" lang="en" xmltv_id="Stadium.us@SD">Stadium</channel>
   <channel site="pluto.tv" site_id="5e9f2c05172a0f0007db4786" lang="en" xmltv_id="CBSSportsHQ.us@SD">CBS Sports HQ</channel>
-  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-5fc705f68aba71002d8b7b37" lang="en" xmltv_id="FuboSportsNetwork.us@SD">Fubo Sports Network</channel>
   <channel site="plex.tv" site_id="5fc705f68aba71002d8b7b37" lang="en" xmltv_id="FuboSportsNetwork.us@SD">Fubo Sports Network</channel>
-  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-5fc70600598c41002da3dd43" lang="en" xmltv_id="NBCSportsNOW.us@SD">NBC Sports NOW</channel>
   <channel site="plex.tv" site_id="5fc70600598c41002da3dd43" lang="en" xmltv_id="NBCSportsNOW.us@SD">NBC Sports NOW</channel>
 
   <!-- USA: fighting (UFC-style MMA, boxing) -->
@@ -58,15 +51,16 @@
   <channel site="watchyour.tv" site_id="786" lang="en" xmltv_id="TVSBoxing.us@SD">TVS Boxing</channel>
 
   <!-- USA: movies -->
-  <channel site="tvtv.us" site_id="10021" lang="en" xmltv_id="AMC.us@EastHD">AMC</channel>
+  <channel site="tvguide.com" site_id="9233011832" lang="en" xmltv_id="AMC.us@EastHD">AMC</channel>
+  <channel site="tvpassport.com" site_id="amc--eastern-feed-hd/6219" lang="en" xmltv_id="AMC.us@EastHD">AMC</channel>
   <channel site="tvguide.com" site_id="9200004316" lang="en" xmltv_id="SYFY.us@East">SYFY</channel>
-  <channel site="tvtv.us" site_id="14873" lang="en" xmltv_id="IFC.us@East">IFC</channel>
-  <channel site="tvtv.us" site_id="11163" lang="en" xmltv_id="ParamountNetwork.us@East">Paramount Network</channel>
-  <channel site="tvtv.us" site_id="18480" lang="en" xmltv_id="LifetimeMovies.us@East">Lifetime Movies</channel>
-  <channel site="tvtv.us" site_id="19634" lang="en" xmltv_id="StarzCinema.us@East">Starz Cinema</channel>
-  <channel site="tvtv.us" site_id="34901" lang="en" xmltv_id="StarzComedy.us@East">Starz Comedy</channel>
-  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-5fb84bc1b7ad2d002dcb735f" lang="en" xmltv_id="MovieSphere.us@US">MovieSphere</channel>
+  <channel site="tvguide.com" site_id="9200004303" lang="en" xmltv_id="IFC.us@East">IFC</channel>
+  <channel site="tvpassport.com" site_id="independent-film-channel-us-hd/6215" lang="en" xmltv_id="IFC.us@East">IFC</channel>
+  <channel site="tvguide.com" site_id="9233013810" lang="en" xmltv_id="ParamountNetwork.us@East">Paramount Network</channel>
+  <channel site="tvguide.com" site_id="9233009825" lang="en" xmltv_id="LifetimeMovies.us@East">Lifetime Movies</channel>
+  <channel site="tvguide.com" site_id="9233008357" lang="en" xmltv_id="StarzCinema.us@East">Starz Cinema</channel>
+  <channel site="tvguide.com" site_id="9233003558" lang="en" xmltv_id="StarzComedy.us@East">Starz Comedy</channel>
+  <channel site="tvpassport.com" site_id="starz-comedy--eastern/4223" lang="en" xmltv_id="StarzComedy.us@East">Starz Comedy</channel>
   <channel site="xumo.tv" site_id="0#99951251" lang="en" xmltv_id="MovieSphere.us@US">MovieSphere</channel>
   <channel site="pluto.tv" site_id="628e685ba3811100070551a8" lang="en" xmltv_id="HallmarkMoviesMore.us@SD">Hallmark Movies &amp; More</channel>
-  <channel site="i.mjh.nz" site_id="Plex/us#5e20b730f2f8d5003d739db7-6244cf3c742b0d58cd4f2514" lang="en" xmltv_id="HallmarkMoviesMore.us@SD">Hallmark Movies &amp; More</channel>
 </channels>
