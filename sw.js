@@ -1,11 +1,11 @@
 // Free TV service worker: caches the app shell and the last playlist so the app
 // opens instantly and still lists channels when the playlist host is unreachable.
-const VERSION = 'freetv-v2';
+const VERSION = 'freetv-v3';
 const SHELL = [
   './',
   'index.html',
-  'styles.css',
-  'app.js',
+  'styles.css?v=3',
+  'app.js?v=3',
   'manifest.webmanifest',
   'vendor/hls.min.js',
   'icons/icon.svg',
@@ -54,12 +54,13 @@ self.addEventListener('fetch', (event) => {
   // Streams and logos from other sites pass straight through.
   if (url.origin === self.location.origin) {
     event.respondWith(
-      fetch(req)
+      // no-cache: always check with the server so a new deploy is picked up immediately.
+      fetch(req.url, { cache: 'no-cache' })
         .then((res) => {
-          if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); }
+          if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req.url, copy)); }
           return res;
         })
-        .catch(() => caches.match(req).then((hit) => hit || Response.error())),
+        .catch(() => caches.match(req.url, { ignoreSearch: req.mode === 'navigate' }).then((hit) => hit || Response.error())),
     );
   }
 });

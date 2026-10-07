@@ -351,13 +351,22 @@
     });
 
     const buttons = [copy];
-    if (navigator.share) {
-      const share = el('button', { className: 'btn', textContent: 'Share' });
-      share.addEventListener('click', () => {
-        navigator.share({ title: current ? current.name : 'Free TV', url }).catch(() => {});
-      });
-      buttons.push(share);
-    }
+    // Always offer Share: the system share sheet where the browser supports it,
+    // Android's share chooser otherwise, and copying as the last resort.
+    const share = el('button', { className: 'btn', textContent: 'Share' });
+    share.addEventListener('click', async () => {
+      const title = current ? current.name : 'Free TV';
+      if (navigator.share) {
+        try { await navigator.share({ title, text: url }); return; } catch (err) { if (err && err.name === 'AbortError') return; }
+      }
+      if (IS_ANDROID) {
+        location.href = 'intent:#Intent;action=android.intent.action.SEND;type=text/plain;' +
+          `S.android.intent.extra.TEXT=${encodeURIComponent(url)};end`;
+        return;
+      }
+      copy.click();
+    });
+    buttons.push(share);
     if (IS_ANDROID) {
       const u = new URL(url);
       const intent = `intent://${u.host}${u.pathname}${u.search}#Intent;scheme=${u.protocol.slice(0, -1)};` +
@@ -612,7 +621,15 @@
   });
 
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then((reg) => reg.update()).catch(() => {});
+    // When a newer version takes over, reload once so the page runs the new code.
+    let reloaded = false;
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || reloaded || (current && !video.paused)) return;
+      reloaded = true;
+      location.reload();
+    });
   }
 
   loadPlaylist();

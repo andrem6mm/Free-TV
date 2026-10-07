@@ -250,3 +250,5 @@ a { color: var(--accent); }
   .channels { overflow: visible; }
   .topbar { padding: 8px 12px; }
 }
+
+.version { white-space: nowrap; opacity: .7; }
