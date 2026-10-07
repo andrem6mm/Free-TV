@@ -1,0 +1,4 @@
+# Orchestration scratch: plans, worker reports, screenshots
+.orchestration/
+# Personal Claude Code overrides
+.claude/settings.local.json

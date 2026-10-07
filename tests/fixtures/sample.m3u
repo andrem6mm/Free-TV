@@ -1,0 +1,13 @@
+#EXTM3U
+#EXTINF:-1 tvg-id="NewsOne.us@SD" tvg-logo="" group-title="News",News One (720p)
+https://example.invalid/newsone/index.m3u8
+#EXTINF:-1 tvg-id="SportZone.uk@HD" tvg-logo="" group-title="Sports",Sport Zone (1080p)
+https://example.invalid/sportzone/index.m3u8
+#EXTINF:-1 tvg-id="KidsFun.de" tvg-logo="" group-title="Kids;Animation",Kids Fun
+https://example.invalid/kidsfun/index.m3u8
+#EXTINF:-1 tvg-id="CineMax.fr" tvg-logo="" group-title="Movies",Cine Max [Geo-blocked]
+https://example.invalid/cinemax/index.m3u8
+#EXTINF:-1 tvg-id="OldHttp.ee" tvg-logo="" group-title="General",Old Http TV
+http://example.invalid/oldhttp/index.m3u8
+#EXTINF:-1 tvg-id="" tvg-country="ES" tvg-logo="" group-title="Undefined",Canal Sin Id
+https://example.invalid/canal/index.m3u8
