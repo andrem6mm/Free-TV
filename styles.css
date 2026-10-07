@@ -252,3 +252,4 @@ a { color: var(--accent); }
 }
 
 .version { white-space: nowrap; opacity: .7; }
+.top-actions { display: flex; gap: 8px; }

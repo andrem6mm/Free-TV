@@ -331,6 +331,20 @@
 
   const IS_ANDROID = /Android/i.test(navigator.userAgent);
 
+  // Open the system share sheet where the browser supports it, Android's share chooser
+  // otherwise, and fall back to copying.
+  async function shareText(title, text, fallback) {
+    if (navigator.share) {
+      try { await navigator.share({ title, text }); return; } catch (err) { if (err && err.name === 'AbortError') return; }
+    }
+    if (IS_ANDROID) {
+      location.href = 'intent:#Intent;action=android.intent.action.SEND;type=text/plain;' +
+        `S.android.intent.extra.TEXT=${encodeURIComponent(text)};end`;
+      return;
+    }
+    fallback();
+  }
+
   // Address of a stream plus buttons to copy it, share it, or hand it to VLC.
   function linkTools(url) {
     const field = el('input', { className: 'link-field', value: url, readOnly: true, ariaLabel: 'Stream address' });
@@ -354,18 +368,7 @@
     // Always offer Share: the system share sheet where the browser supports it,
     // Android's share chooser otherwise, and copying as the last resort.
     const share = el('button', { className: 'btn', textContent: 'Share' });
-    share.addEventListener('click', async () => {
-      const title = current ? current.name : 'Free TV';
-      if (navigator.share) {
-        try { await navigator.share({ title, text: url }); return; } catch (err) { if (err && err.name === 'AbortError') return; }
-      }
-      if (IS_ANDROID) {
-        location.href = 'intent:#Intent;action=android.intent.action.SEND;type=text/plain;' +
-          `S.android.intent.extra.TEXT=${encodeURIComponent(url)};end`;
-        return;
-      }
-      copy.click();
-    });
+    share.addEventListener('click', () => shareText(current ? current.name : 'Free TV', url, () => copy.click()));
     buttons.push(share);
     if (IS_ANDROID) {
       const u = new URL(url);
@@ -605,6 +608,12 @@
       navigator.mediaSession.setActionHandler('nexttrack', () => step(1));
     } catch { /* unsupported */ }
   }
+
+  // ---------- share the app ----------
+  const APP_URL = location.origin + location.pathname;
+  $('shareAppBtn').addEventListener('click', () => shareText('Free TV', `Free TV, free channels from around the world: ${APP_URL}`, async () => {
+    try { await navigator.clipboard.writeText(APP_URL); flashOsd('App link copied'); } catch { flashOsd(APP_URL); }
+  }));
 
   // ---------- install / offline ----------
   let installEvent = null;

@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <header class="topbar">
@@ -19,7 +19,10 @@
       <img src="icons/icon.svg" alt="" width="28" height="28">
       <span>Free TV</span>
     </div>
-    <button id="installBtn" class="btn ghost" hidden>Install app</button>
+    <div class="top-actions">
+      <button id="installBtn" class="btn ghost" hidden>Install app</button>
+      <button id="shareAppBtn" class="btn ghost">Share app</button>
+    </div>
   </header>
 
   <main class="layout">
@@ -86,10 +89,10 @@
   </main>
 
   <footer class="footer">
-    Channels from the community-maintained <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org/iptv</a> playlist. Free TV hosts no streams; some may be offline or region-locked. <span class="version">Version 4</span>
+    Channels from the community-maintained <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org/iptv</a> playlist. Free TV hosts no streams; some may be offline or region-locked. <span class="version">Version 5</span>
   </footer>
 
   <script src="vendor/hls.min.js"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>
