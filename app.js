@@ -57,6 +57,7 @@
   let recent = store.get('recent', []);
   const prefs = Object.assign({
     tab: 'all',
+    listCollapsed: false,
     country: '',
     category: '',
     hideHttp: IS_HTTPS,
@@ -259,6 +260,7 @@
       listEl.append(el('li', { className: 'empty', textContent: msg }));
     }
     countEl.textContent = `${view.length.toLocaleString()} channel${view.length === 1 ? '' : 's'}`;
+    $('listToggleLabel').textContent = `Channels (${view.length.toLocaleString()})`;
     renderMore();
   }
 
@@ -608,6 +610,22 @@
       navigator.mediaSession.setActionHandler('nexttrack', () => step(1));
     } catch { /* unsupported */ }
   }
+
+  // ---------- collapse the channel list ----------
+  function setListCollapsed(collapsed) {
+    prefs.listCollapsed = collapsed;
+    savePrefs();
+    $('listPane').classList.toggle('collapsed', collapsed);
+    $('listBody').hidden = collapsed;
+    $('listToggle').setAttribute('aria-expanded', String(!collapsed));
+    $('listToggleText').textContent = collapsed ? 'Show' : 'Hide';
+  }
+  $('listToggle').addEventListener('click', () => {
+    const collapse = !prefs.listCollapsed;
+    setListCollapsed(collapse);
+    if (!collapse) scrollToCurrent();
+  });
+  setListCollapsed(prefs.listCollapsed);
 
   // ---------- share the app ----------
   const APP_URL = location.origin + location.pathname;
