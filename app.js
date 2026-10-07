@@ -60,10 +60,12 @@
     listCollapsed: false,
     country: '',
     category: '',
-    hideHttp: IS_HTTPS,
+    hideHttp: false,
     hideGeo: false,
     playlist: DEFAULT_PLAYLIST,
   }, store.get('prefs', {}));
+  // Older versions hid HTTP-only channels by default; show every channel again once.
+  if (!(prefs.v >= 7)) { prefs.hideHttp = false; prefs.v = 7; store.set('prefs', prefs); }
 
   const savePrefs = () => store.set('prefs', prefs);
 
@@ -634,18 +636,30 @@
   }));
 
   // ---------- install / offline ----------
+  // The button is always shown (except inside the installed app): browsers that offer an
+  // install prompt get it, everyone else gets the steps for "Add to Home screen".
   let installEvent = null;
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  $('installBtn').hidden = standalone;
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     installEvent = e;
-    $('installBtn').hidden = false;
   });
+  window.addEventListener('appinstalled', () => { $('installBtn').hidden = true; });
   $('installBtn').addEventListener('click', async () => {
-    if (!installEvent) return;
-    installEvent.prompt();
-    await installEvent.userChoice.catch(() => {});
-    installEvent = null;
-    $('installBtn').hidden = true;
+    if (installEvent) {
+      installEvent.prompt();
+      await installEvent.userChoice.catch(() => {});
+      installEvent = null;
+      return;
+    }
+    const ua = navigator.userAgent;
+    const steps = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)
+      ? 'iPhone / iPad: open this page in Safari, tap the Share button (square with an arrow), then "Add to Home Screen".'
+      : IS_ANDROID
+        ? 'Android: open the browser menu (⋮ top right) and tap "Install app" or "Add to Home screen".'
+        : 'Computer: in Chrome or Edge, click the install icon at the right end of the address bar, or open the menu (⋮) → "Cast, save and share" → "Install page as app".';
+    alert(`To install Free TV:\n\n${steps}`);
   });
 
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
