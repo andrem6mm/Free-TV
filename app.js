@@ -400,7 +400,8 @@
     updateNowPlaying();
     refreshRows();
     scrollToCurrent();
-    if (autoplay) {
+    // HTTP-only channels can't play here anyway, so go straight to the copy/share/VLC options.
+    if (autoplay || (IS_HTTPS && c.httpOnly)) {
       recent = [c.url, ...recent.filter((u) => u !== c.url)].slice(0, MAX_RECENT);
       store.set('recent', recent);
       play(c);
