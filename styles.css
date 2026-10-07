@@ -280,3 +280,32 @@ a { color: var(--accent); }
 .list-pane.collapsed { align-self: start; }
 .list-body[hidden] { display: none; }
 .layout { align-content: start; }
+
+.cats {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 -10px;
+  padding: 0 10px 2px;
+  scroll-padding: 0 10px;
+}
+.cats::-webkit-scrollbar { display: none; }
+.chip {
+  flex: none;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.chip:hover { border-color: var(--accent); }
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+@media (min-width: 861px) {
+  .cats { flex-wrap: wrap; overflow: hidden auto; max-height: 124px; scrollbar-width: thin; }
+  .chip { padding: 6px 11px; line-height: 1.3; }
+}

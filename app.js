@@ -36,7 +36,7 @@
   const countEl = $('count');
   const searchEl = $('search');
   const countryEl = $('country');
-  const categoryEl = $('category');
+  const catsEl = $('cats');
   const hideHttpEl = $('hideHttp');
   const hideGeoEl = $('hideGeo');
   const playlistUrlEl = $('playlistUrl');
@@ -225,13 +225,8 @@
       el('option', { value: '', textContent: 'All countries' }),
       ...countries.map((c) => el('option', { value: c.code, textContent: `${c.flag} ${c.name} (${cCounts.get(c.code)})`.trim() })),
     );
-    const groups = [...gCounts.keys()].sort((a, b) => a.localeCompare(b));
-    categoryEl.replaceChildren(
-      el('option', { value: '', textContent: 'All categories' }),
-      ...groups.map((g) => el('option', { value: g, textContent: `${g} (${gCounts.get(g)})` })),
-    );
     countryEl.value = cCounts.has(prefs.country) ? prefs.country : '';
-    categoryEl.value = gCounts.has(prefs.category) ? prefs.category : '';
+    if (!gCounts.has(prefs.category)) prefs.category = '';
   }
 
   // ---------- filtering & rendering ----------
@@ -244,13 +239,14 @@
 
     const q = searchEl.value.trim().toLowerCase();
     const cc = countryEl.value;
-    const cat = categoryEl.value;
-    view = base.filter((c) =>
+    const cat = prefs.category;
+    const matching = base.filter((c) =>
       (!q || c.search.includes(q)) &&
       (!cc || c.country === cc) &&
-      (!cat || c.groups.includes(cat)) &&
       (!prefs.hideHttp || !c.httpOnly) &&
       (!prefs.hideGeo || !c.geo));
+    view = cat ? matching.filter((c) => c.groups.includes(cat)) : matching;
+    renderCategories(matching);
 
     rendered = 0;
     listEl.replaceChildren();
@@ -264,6 +260,42 @@
     countEl.textContent = `${view.length.toLocaleString()} channel${view.length === 1 ? '' : 's'}`;
     $('listToggleLabel').textContent = `Channels (${view.length.toLocaleString()})`;
     renderMore();
+  }
+
+  // Category chips, counted over the channels the other filters leave, so they only
+  // offer categories that actually have something (e.g. for the chosen country).
+  const CAT_ORDER = ['News', 'Sports', 'Movies', 'Series', 'Entertainment', 'Music', 'Kids', 'Documentary', 'General'];
+  const CAT_ICONS = {
+    News: '📰', Sports: '⚽', Movies: '🎬', Series: '📺', Entertainment: '🎭', Music: '🎵', Kids: '🧸',
+    Documentary: '🌍', General: '📡', Religious: '⛪', Education: '🎓', Comedy: '😂', Culture: '🎨',
+    Legislative: '🏛️', Animation: '🐭', Lifestyle: '✨', Classic: '🎞️', Shop: '🛍️', Outdoor: '🏕️',
+    Business: '💼', Travel: '✈️', Family: '👪', Cooking: '🍳', Public: '📢', Auto: '🚗', Science: '🔬',
+    Weather: '⛅', Relax: '🧘', Interactive: '🕹️', Undefined: '❔',
+  };
+  const catLabel = (g) => (g === 'Undefined' ? 'Other' : g);
+  function renderCategories(list) {
+    const counts = new Map();
+    for (const c of list) for (const g of c.groups) counts.set(g, (counts.get(g) || 0) + 1);
+    const rank = (g) => { const i = CAT_ORDER.indexOf(g); return i < 0 ? CAT_ORDER.length + (g === 'Undefined' ? 1 : 0) : i; };
+    const groups = [...counts.keys()].sort((a, b) => rank(a) - rank(b) || counts.get(b) - counts.get(a));
+    if (prefs.category && !counts.has(prefs.category)) groups.unshift(prefs.category);
+    const chip = (value, label, n) => el('button', {
+      className: `chip${prefs.category === value ? ' on' : ''}`,
+      type: 'button',
+      textContent: n == null ? label : `${label} ${n.toLocaleString()}`,
+      onclick: () => {
+        prefs.category = prefs.category === value ? '' : value;
+        savePrefs();
+        applyFilters();
+      },
+    });
+    catsEl.replaceChildren(
+      chip('', 'All', list.length),
+      ...groups.map((g) => chip(g, `${CAT_ICONS[g] || '📺'} ${catLabel(g)}`, counts.get(g) || 0)),
+    );
+    // Keep the selected chip in view without scrolling the page.
+    const on = catsEl.querySelector('.chip.on');
+    if (on && on.offsetTop - catsEl.offsetTop === 0) catsEl.scrollLeft = Math.max(0, on.offsetLeft - catsEl.offsetLeft - 40);
   }
 
   function renderMore() {
@@ -537,7 +569,6 @@
   let searchTimer;
   searchEl.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(applyFilters, 150); });
   countryEl.addEventListener('change', () => { prefs.country = countryEl.value; savePrefs(); applyFilters(); });
-  categoryEl.addEventListener('change', () => { prefs.category = categoryEl.value; savePrefs(); applyFilters(); });
 
   hideHttpEl.checked = prefs.hideHttp;
   hideGeoEl.checked = prefs.hideGeo;
