@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
   <header class="topbar">
@@ -71,8 +71,9 @@
       <div class="filters">
         <div class="search-row">
           <input id="search" type="search" placeholder="Search channels…" autocomplete="off">
-          <select id="country" aria-label="Country"><option value="">All countries</option></select>
+          <button class="country-btn" id="countryBtn" type="button" aria-haspopup="dialog"><span id="countryBtnText">🌍 All countries</span><span class="caret" aria-hidden="true">▾</span></button>
         </div>
+        <div class="cats" id="favCountries" role="group" aria-label="Favorite countries" hidden></div>
         <div class="cats" id="cats" role="group" aria-label="Categories"></div>
       </div>
       <div class="count-row">
@@ -98,11 +99,23 @@
 
   <button class="to-top" id="topBtn" aria-label="Back to top of the channel list" hidden>↑ Top</button>
 
+  <div class="sheet-backdrop" id="countrySheet" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet-head">
+        <strong id="sheetTitle">Choose a country</strong>
+        <button class="btn icon ghost" id="sheetClose" aria-label="Close">✕</button>
+      </div>
+      <div class="sheet-search"><input id="countrySearch" type="search" placeholder="Search countries…" autocomplete="off"></div>
+      <ul class="country-list" id="countryList"></ul>
+      <button class="to-top sheet-top" id="sheetTop" aria-label="Back to top of the country list" hidden>↑ Top</button>
+    </div>
+  </div>
+
   <footer class="footer">
-    Channels from the community-maintained <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org/iptv</a> playlist. Free TV hosts no streams; some may be offline or region-locked. <span class="version">Version 9</span>
+    Channels from the community-maintained <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org/iptv</a> playlist. Free TV hosts no streams; some may be offline or region-locked. <span class="version">Version 10</span>
   </footer>
 
   <script src="vendor/hls.min.js"></script>
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>

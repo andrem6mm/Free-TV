@@ -312,7 +312,26 @@ a { color: var(--accent); }
 
 .search-row { display: flex; gap: 8px; }
 .search-row input { flex: 1 1 55%; }
-.filters .search-row select { flex: 1 1 45%; width: auto; max-width: 45%; }
+.country-btn {
+  flex: 1 1 45%;
+  max-width: 45%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.country-btn:hover { border-color: var(--accent); }
+.country-btn span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.country-btn .caret { color: var(--muted); flex: none; }
 .count-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 12px; flex: none; }
 .link-btn { background: none; border: 0; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; padding: 6px 0; }
 .link-btn:hover, .link-btn[aria-expanded="true"] { color: var(--text); }
@@ -337,4 +356,71 @@ a { color: var(--accent); }
   /* Only pin the player once something is playing; before that it just takes space. */
   body:not(.has-channel) .player-pane { position: static; }
   .now-playing .btn.icon { width: 40px; height: 40px; }
+}
+
+body.sheet-open { overflow: hidden; }
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, .6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.sheet-backdrop[hidden] { display: none; }
+.sheet {
+  position: relative;
+  width: min(460px, 100%);
+  max-height: min(720px, 90vh);
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .6);
+}
+.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 6px 6px 6px 16px; border-bottom: 1px solid var(--border); font-size: 17px; }
+.sheet-search { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+.sheet-search input {
+  width: 100%;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  font: inherit;
+}
+.country-list { list-style: none; margin: 0; padding: 4px 6px 72px; overflow-y: auto; flex: 1; overscroll-behavior: contain; }
+.country-section { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; padding: 14px 10px 4px; }
+.country-empty { color: var(--muted); font-size: 13px; padding: 6px 10px 8px; }
+.country-row { display: flex; align-items: center; border-radius: 8px; }
+.country-row:hover { background: var(--surface-2); }
+.country-row.active { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.country-pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: 0;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  padding: 11px 10px;
+  cursor: pointer;
+}
+.country-pick .flag { font-size: 20px; width: 26px; text-align: center; flex: none; }
+.country-pick .cname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.country-pick .ccount { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.country-row .star { background: none; border: 0; color: var(--muted); font-size: 20px; width: 44px; height: 44px; flex: none; cursor: pointer; }
+.country-row .star.on { color: var(--star); }
+.sheet-top { position: absolute; right: 16px; bottom: 16px; }
+@media (max-width: 860px) {
+  .sheet-backdrop { align-items: flex-end; padding: 0; }
+  .sheet { width: 100%; max-height: 88vh; border-radius: 16px 16px 0 0; border-bottom: 0; padding-bottom: env(safe-area-inset-bottom); }
+  .sheet-top { bottom: calc(16px + env(safe-area-inset-bottom)); }
 }

@@ -35,7 +35,6 @@
   const listEl = $('channels');
   const countEl = $('count');
   const searchEl = $('search');
-  const countryEl = $('country');
   const catsEl = $('cats');
   const hideHttpEl = $('hideHttp');
   const hideGeoEl = $('hideGeo');
@@ -220,18 +219,9 @@
       if (c.country) cCounts.set(c.country, (cCounts.get(c.country) || 0) + 1);
       for (const g of c.groups) gCounts.set(g, (gCounts.get(g) || 0) + 1);
     }
-    const countries = [...cCounts.keys()].map(country).sort((a, b) => a.name.localeCompare(b.name));
-    const option = (c) => el('option', { value: c.code, textContent: `${c.flag} ${c.name} (${cCounts.get(c.code)})`.trim() });
-    // Quick picks at the top: countries picked before, plus the one the device is set to.
-    const own = (navigator.language || '').split('-')[1]?.toLowerCase();
-    const quick = [...new Set([...(prefs.recentCountries || []), own === 'gb' ? 'uk' : own])]
-      .filter((code) => code && cCounts.has(code)).slice(0, 4);
-    countryEl.replaceChildren(
-      el('option', { value: '', textContent: 'All countries' }),
-      quick.length ? el('optgroup', { label: 'Quick picks' }, ...quick.map((code) => option(country(code)))) : null,
-      el('optgroup', { label: 'All countries' }, ...countries.map(option)),
-    );
-    countryEl.value = cCounts.has(prefs.country) ? prefs.country : '';
+    countryCounts = cCounts;
+    if (!cCounts.has(prefs.country)) prefs.country = '';
+    updateCountryUI();
     if (!gCounts.has(prefs.category)) prefs.category = '';
   }
 
@@ -244,7 +234,7 @@
     else base = channels;
 
     const q = searchEl.value.trim().toLowerCase();
-    const cc = countryEl.value;
+    const cc = prefs.country;
     const cat = prefs.category;
     const matching = base.filter((c) =>
       (!q || c.search.includes(q)) &&
@@ -602,11 +592,117 @@
 
   let searchTimer;
   searchEl.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(applyFilters, 150); });
-  countryEl.addEventListener('change', () => {
-    prefs.country = countryEl.value;
-    if (prefs.country) prefs.recentCountries = [prefs.country, ...(prefs.recentCountries || []).filter((c) => c !== prefs.country)].slice(0, 3);
+
+  // ---------- country picker (with favorite countries) ----------
+  let countryCounts = new Map();
+  const favCountries = new Set(store.get('favCountries', []));
+  const sheet = $('countrySheet');
+  const countryList = $('countryList');
+  const countrySearch = $('countrySearch');
+
+  function setCountry(code) {
+    prefs.country = code;
+    if (code) prefs.recentCountries = [code, ...(prefs.recentCountries || []).filter((c) => c !== code)].slice(0, 3);
     savePrefs();
+    updateCountryUI();
     applyFilters();
+  }
+
+  function toggleFavCountry(code) {
+    if (favCountries.has(code)) favCountries.delete(code); else favCountries.add(code);
+    store.set('favCountries', [...favCountries]);
+    updateCountryUI();
+    if (!sheet.hidden) renderCountryList();
+  }
+
+  function updateCountryUI() {
+    const c = prefs.country && country(prefs.country);
+    $('countryBtnText').textContent = c ? `${c.flag} ${c.name}` : '🌍 All countries';
+    // Favorite countries as one-tap chips above the categories.
+    const favs = [...favCountries].filter((code) => countryCounts.has(code)).map(country)
+      .sort((a, b) => a.name.localeCompare(b.name));
+    const row = $('favCountries');
+    row.hidden = !favs.length;
+    row.replaceChildren(...favs.map((f) => el('button', {
+      type: 'button',
+      className: `chip${prefs.country === f.code ? ' on' : ''}`,
+      textContent: `${f.flag} ${f.name}`,
+      title: prefs.country === f.code ? 'Show all countries' : `Only ${f.name}`,
+      onclick: () => setCountry(prefs.country === f.code ? '' : f.code),
+    })));
+  }
+
+  function countryRow(c) {
+    const fav = favCountries.has(c.code);
+    return el('li', { className: `country-row${prefs.country === c.code ? ' active' : ''}` },
+      el('button', {
+        type: 'button',
+        className: 'country-pick',
+        onclick: () => { setCountry(c.code); closeCountrySheet(); },
+      },
+      el('span', { className: 'flag', textContent: c.flag || '🌐' }),
+      el('span', { className: 'cname', textContent: c.name }),
+      el('span', { className: 'ccount', textContent: (countryCounts.get(c.code) || 0).toLocaleString() })),
+      el('button', {
+        type: 'button',
+        className: `star${fav ? ' on' : ''}`,
+        textContent: fav ? '★' : '☆',
+        title: fav ? 'Remove from favorite countries' : 'Add to favorite countries',
+        ariaLabel: fav ? `Remove ${c.name} from favorites` : `Add ${c.name} to favorites`,
+        onclick: () => toggleFavCountry(c.code),
+      }));
+  }
+
+  function renderCountryList() {
+    const q = countrySearch.value.trim().toLowerCase();
+    const all = [...countryCounts.keys()].map(country).sort((a, b) => a.name.localeCompare(b.name));
+    const shown = q ? all.filter((c) => c.name.toLowerCase().includes(q) || c.code === q) : all;
+    const section = (title) => el('li', { className: 'country-section', textContent: title });
+    const items = [];
+    if (!q) {
+      items.push(el('li', { className: `country-row${prefs.country ? '' : ' active'}` },
+        el('button', { type: 'button', className: 'country-pick', onclick: () => { setCountry(''); closeCountrySheet(); } },
+          el('span', { className: 'flag', textContent: '🌍' }),
+          el('span', { className: 'cname', textContent: 'All countries' }),
+          el('span', { className: 'ccount', textContent: channels.length.toLocaleString() }))));
+      const favs = all.filter((c) => favCountries.has(c.code));
+      items.push(section('★ Favorites'));
+      if (favs.length) items.push(...favs.map(countryRow));
+      else items.push(el('li', { className: 'country-empty', textContent: 'Tap ☆ next to a country to keep it here.' }));
+      const own = (navigator.language || '').split('-')[1]?.toLowerCase();
+      const suggested = [...new Set([...(prefs.recentCountries || []), own === 'gb' ? 'uk' : own])]
+        .filter((code) => code && countryCounts.has(code) && !favCountries.has(code)).slice(0, 4);
+      if (suggested.length) items.push(section('Recent & nearby'), ...suggested.map((code) => countryRow(country(code))));
+      items.push(section('All countries'));
+    }
+    items.push(...shown.map(countryRow));
+    if (q && !shown.length) items.push(el('li', { className: 'country-empty', textContent: 'No country matches that.' }));
+    const keep = countryList.scrollTop;
+    countryList.replaceChildren(...items);
+    countryList.scrollTop = keep;
+  }
+
+  function openCountrySheet() {
+    countrySearch.value = '';
+    renderCountryList();
+    sheet.hidden = false;
+    document.body.classList.add('sheet-open');
+    countryList.scrollTop = 0;
+    $('sheetTop').hidden = true;
+    if (isDesktop()) countrySearch.focus();
+  }
+  function closeCountrySheet() {
+    sheet.hidden = true;
+    document.body.classList.remove('sheet-open');
+    $('countryBtn').focus({ preventScroll: true });
+  }
+  $('countryBtn').addEventListener('click', openCountrySheet);
+  $('sheetClose').addEventListener('click', closeCountrySheet);
+  sheet.addEventListener('click', (e) => { if (e.target === sheet) closeCountrySheet(); });
+  countrySearch.addEventListener('input', () => { countryList.scrollTop = 0; renderCountryList(); });
+  countryList.addEventListener('scroll', () => { $('sheetTop').hidden = countryList.scrollTop < 400; }, { passive: true });
+  $('sheetTop').addEventListener('click', () => {
+    countryList.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   });
   $('settingsBtn').addEventListener('click', () => {
     const panel = $('settings');
@@ -640,6 +736,7 @@
   let digitTimer;
   document.addEventListener('keydown', (e) => {
     const t = e.target;
+    if (!sheet.hidden) { if (e.key === 'Escape') closeCountrySheet(); return; }
     const typing = t instanceof HTMLInputElement || t instanceof HTMLSelectElement || t instanceof HTMLTextAreaElement;
     if (e.key === 'Escape' && t === searchEl) { searchEl.blur(); return; }
     if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
