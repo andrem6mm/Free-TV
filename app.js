@@ -325,8 +325,47 @@
     box.replaceChildren();
     if (spinner) box.append(el('div', { className: 'spinner' }));
     box.append(text);
-    if (link) box.append(el('br'), el('a', { href: link, target: '_blank', rel: 'noopener', textContent: link }));
+    if (link) box.append(linkTools(link));
     overlayActions.hidden = !actions;
+  }
+
+  const IS_ANDROID = /Android/i.test(navigator.userAgent);
+
+  // Address of a stream plus buttons to copy it, share it, or hand it to VLC.
+  function linkTools(url) {
+    const field = el('input', { className: 'link-field', value: url, readOnly: true, ariaLabel: 'Stream address' });
+    field.addEventListener('focus', () => field.select());
+    const note = el('div', { className: 'link-note' });
+    const flash = (msg) => { note.textContent = msg; clearTimeout(flash.t); flash.t = setTimeout(() => { note.textContent = ''; }, 2500); };
+
+    const copy = el('button', { className: 'btn', textContent: 'Copy link' });
+    copy.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        flash('Link copied');
+      } catch {
+        field.focus();
+        field.select();
+        flash(document.execCommand && document.execCommand('copy') ? 'Link copied' : 'Press and hold the link to copy it');
+      }
+    });
+
+    const buttons = [copy];
+    if (navigator.share) {
+      const share = el('button', { className: 'btn', textContent: 'Share' });
+      share.addEventListener('click', () => {
+        navigator.share({ title: current ? current.name : 'Free TV', url }).catch(() => {});
+      });
+      buttons.push(share);
+    }
+    if (IS_ANDROID) {
+      const u = new URL(url);
+      const intent = `intent://${u.host}${u.pathname}${u.search}#Intent;scheme=${u.protocol.slice(0, -1)};` +
+        'package=org.videolan.vlc;type=video/*;' +
+        `S.browser_fallback_url=${encodeURIComponent('https://play.google.com/store/apps/details?id=org.videolan.vlc')};end`;
+      buttons.push(el('a', { className: 'btn', href: intent, textContent: 'Open in VLC' }));
+    }
+    return el('div', { className: 'link-tools' }, field, el('div', { className: 'link-buttons' }, ...buttons), note);
   }
   const hideOverlay = () => { overlay.hidden = true; };
 
@@ -342,7 +381,8 @@
     if (hls) { hls.destroy(); hls = null; }
     video.removeAttribute('src');
     video.load();
-    showOverlay(msg || "This channel isn't working right now. It may be offline or blocked in your region.", { actions: true });
+    showOverlay(msg || "This channel isn't working right now. It may be offline or blocked in your region. You can also try it in VLC:",
+      { actions: true, link: current ? current.url : null });
   }
 
   function select(c, { autoplay = true } = {}) {
@@ -369,7 +409,7 @@
     triedRecover = false;
 
     if (IS_HTTPS && c.httpOnly) {
-      showOverlay('This channel only offers an insecure (HTTP) stream, which browsers block on secure pages. You can open it in a player such as VLC:',
+      showOverlay('This channel only offers an insecure (HTTP) stream, which browsers block on secure pages. You can open it in a player such as VLC instead:',
         { actions: true, link: c.url });
       return;
     }
