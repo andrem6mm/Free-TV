@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Free TV</title>
+  <meta name="description" content="Watch thousands of free, publicly available TV channels from around the world.">
+  <meta name="theme-color" content="#0f1115">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="icons/icon.svg" alt="" width="28" height="28">
+      <span>Free TV</span>
+    </div>
+    <button id="installBtn" class="btn ghost" hidden>Install app</button>
+  </header>
+
+  <main class="layout">
+    <section class="player-pane">
+      <div class="player" id="player">
+        <video id="video" controls playsinline preload="none"></video>
+        <div class="overlay" id="overlay">
+          <div class="overlay-box">
+            <p id="overlayText">Pick a channel to start watching.</p>
+            <div class="overlay-actions" id="overlayActions" hidden>
+              <button class="btn" id="retryBtn">Retry</button>
+              <button class="btn primary" id="skipBtn">Next channel</button>
+            </div>
+          </div>
+        </div>
+        <div class="osd" id="osd" hidden></div>
+      </div>
+
+      <div class="now-playing">
+        <button class="btn icon" id="prevBtn" title="Previous channel (↑)" aria-label="Previous channel">&#9650;</button>
+        <div class="np-info">
+          <img id="npLogo" alt="" hidden>
+          <div class="np-text">
+            <div class="np-name" id="npName">No channel selected</div>
+            <div class="np-meta" id="npMeta"></div>
+          </div>
+        </div>
+        <button class="btn icon" id="favBtn" title="Add to favorites" aria-label="Toggle favorite" disabled>&#9734;</button>
+        <button class="btn icon" id="nextBtn" title="Next channel (↓)" aria-label="Next channel">&#9660;</button>
+      </div>
+      <p class="hint desktop-only">Keys: ↑/↓ switch channel · type a number to jump · F fullscreen · M mute · / search</p>
+      <p class="hint mobile-only">Swipe left/right on the video to switch channels.</p>
+    </section>
+
+    <aside class="list-pane">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="all" role="tab">All</button>
+        <button class="tab" data-tab="fav" role="tab">Favorites</button>
+        <button class="tab" data-tab="recent" role="tab">Recent</button>
+      </div>
+      <div class="filters">
+        <input id="search" type="search" placeholder="Search channels…" autocomplete="off">
+        <div class="selects">
+          <select id="country" aria-label="Country"><option value="">All countries</option></select>
+          <select id="category" aria-label="Category"><option value="">All categories</option></select>
+        </div>
+        <details class="settings">
+          <summary>Settings</summary>
+          <label class="check"><input type="checkbox" id="hideHttp"> Hide channels that can't play on this secure page (HTTP-only)</label>
+          <label class="check"><input type="checkbox" id="hideGeo"> Hide geo-blocked channels</label>
+          <label class="field">Playlist URL
+            <input id="playlistUrl" type="url" spellcheck="false">
+          </label>
+          <div class="row">
+            <button class="btn" id="reloadBtn">Reload playlist</button>
+            <button class="btn ghost" id="resetUrlBtn">Use default</button>
+          </div>
+        </details>
+      </div>
+      <div class="count" id="count">Loading channels…</div>
+      <ul class="channels" id="channels"></ul>
+      <div id="sentinel"></div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    Channels from the community-maintained <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org/iptv</a> playlist. Free TV hosts no streams; some may be offline or region-locked.
+  </footer>
+
+  <script src="vendor/hls.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
