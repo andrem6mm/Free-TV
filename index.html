@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="stylesheet" href="styles.css?v=11">
+  <link rel="stylesheet" href="styles.css?v=12">
 </head>
 <body>
   <header class="topbar">
@@ -53,6 +53,12 @@
         <button class="btn icon" id="favBtn" title="Add to favorites" aria-label="Toggle favorite" disabled>&#9734;</button>
         <button class="btn icon" id="nextBtn" title="Next channel (↓)" aria-label="Next channel">&#9660;</button>
       </div>
+      <section class="guide" id="guide" aria-label="TV schedule" hidden>
+        <div class="guide-now" id="guideNow"></div>
+        <div class="guide-next" id="guideNext"></div>
+        <button class="link-btn guide-more" id="guideMore" aria-expanded="false" aria-controls="guideList">Full schedule <span class="chev" aria-hidden="true">▾</span></button>
+        <ol class="guide-list" id="guideList" hidden></ol>
+      </section>
       <p class="hint desktop-only">Keys: ↑/↓ switch channel · type a number to jump · F fullscreen · M mute · / search</p>
       <p class="hint mobile-only" id="swipeHint">Swipe left/right on the video to switch channels.</p>
     </section>
@@ -112,10 +118,10 @@
   </div>
 
   <footer class="footer">
-    Channels from the community-maintained <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org/iptv</a> playlist. Free TV hosts no streams; some may be offline or region-locked. <span class="version">Version 11</span>
+    Channels from the community-maintained <a href="https://github.com/iptv-org/iptv" target="_blank" rel="noopener">iptv-org/iptv</a> playlist. Free TV hosts no streams; some may be offline or region-locked. <span class="version">Version 12</span>
   </footer>
 
   <script src="vendor/hls.min.js"></script>
-  <script src="app.js?v=11"></script>
+  <script src="app.js?v=12"></script>
 </body>
 </html>

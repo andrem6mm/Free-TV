@@ -144,6 +144,44 @@ a { color: var(--accent); }
 .np-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .np-meta { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+.guide {
+  margin-top: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.guide[hidden], .guide [hidden] { display: none; }
+.guide-now { display: flex; flex-direction: column; gap: 6px; }
+.guide-row { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.guide-label {
+  flex: none; width: 38px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted);
+}
+.guide-now .guide-label { color: var(--accent); }
+.guide-title { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.guide-sub { color: var(--muted); font-weight: 400; }
+.guide-time { flex: none; color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.guide-bar { height: 4px; margin-left: 48px; background: var(--surface-2); border-radius: 2px; overflow: hidden; }
+.guide-bar span { display: block; height: 100%; background: var(--accent); }
+.guide-left { margin-left: 48px; color: var(--muted); font-size: 12px; }
+.guide-desc {
+  margin: 0 0 0 48px; color: var(--muted); font-size: 13px; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.guide-more { align-self: flex-start; }
+.guide-more .chev { display: inline-block; transition: transform 0.2s; }
+.guide-more[aria-expanded="true"] .chev { transform: rotate(180deg); }
+.guide-list { list-style: none; margin: 0 0 6px; padding: 0; max-height: 320px; overflow-y: auto; border-top: 1px solid var(--border); }
+.guide-item { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.guide-item .guide-time { min-width: 38px; }
+.guide-item .guide-title { font-weight: 400; }
+.guide-day { padding: 10px 0 4px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+@media (prefers-reduced-motion: reduce) { .guide-more .chev { transition: none; } }
+
 .hint { color: var(--muted); font-size: 13px; margin: 10px 2px 0; }
 .mobile-only { display: none; }
 
@@ -244,6 +282,10 @@ a { color: var(--accent); }
   .link-tools { margin-top: 6px; gap: 6px; }
   .now-playing { margin: 8px 8px 0; }
   .hint { margin: 6px 12px 0; }
+  /* The player stays pinned at the top on phones, so keep the guide short there. */
+  .guide { margin: 8px 8px 0; padding: 8px 10px 2px; gap: 4px; }
+  .guide:not(.open) .guide-desc { display: none; }
+  .guide-list { max-height: 30vh; }
   .desktop-only { display: none; }
   .mobile-only { display: block; }
   .list-pane { border-radius: 0; border-left: 0; border-right: 0; max-height: none; overflow: visible; }

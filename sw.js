@@ -1,11 +1,11 @@
 // Free TV service worker: caches the app shell and the last playlist so the app
 // opens instantly and still lists channels when the playlist host is unreachable.
-const VERSION = 'freetv-v11';
+const VERSION = 'freetv-v12';
 const SHELL = [
   './',
   'index.html',
-  'styles.css?v=11',
-  'app.js?v=11',
+  'styles.css?v=12',
+  'app.js?v=12',
   'manifest.webmanifest',
   'vendor/hls.min.js',
   'icons/icon.svg',
