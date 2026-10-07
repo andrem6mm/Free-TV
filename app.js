@@ -3,6 +3,9 @@
   'use strict';
 
   const DEFAULT_PLAYLIST = 'https://iptv-org.github.io/iptv/index.m3u';
+  // Same file, served from GitHub directly; used if the main address fails.
+  const MIRROR_PLAYLIST = 'https://raw.githubusercontent.com/iptv-org/iptv/gh-pages/index.m3u';
+  const FETCH_TIMEOUT_MS = 90000;
   const PAGE_SIZE = 150;
   const LOAD_TIMEOUT_MS = 20000;
   const MAX_RECENT = 30;
@@ -48,6 +51,7 @@
   let hls = null;
   let loadTimer = null;
   let triedRecover = false;
+  let loading = true;
 
   const favorites = new Set(store.get('favorites', []));
   let recent = store.get('recent', []);
@@ -145,20 +149,57 @@
   }
 
   // ---------- loading ----------
-  async function loadPlaylist() {
-    countEl.textContent = 'Loading channels…';
-    listEl.replaceChildren();
+  async function fetchText(url) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
     try {
-      const res = await fetch(prefs.playlist, { cache: 'no-cache' });
+      const res = await fetch(url, { signal: ctrl.signal });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      const text = await res.text();
-      channels = parseM3U(text);
-      if (!channels.length) throw new Error('No channels found in playlist');
+      if (!res.body || !res.body.getReader) return await res.text();
+      // Stream the download so we can show progress on slow connections.
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let text = '';
+      let bytes = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        bytes += value.length;
+        text += decoder.decode(value, { stream: true });
+        countEl.textContent = `Downloading channel list… ${(bytes / 1048576).toFixed(1)} MB`;
+      }
+      return text + decoder.decode();
     } catch (err) {
-      channels = [];
+      throw ctrl.signal.aborted ? new Error('timed out') : err;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function loadPlaylist() {
+    loading = true;
+    countEl.textContent = 'Downloading channel list…';
+    listEl.replaceChildren();
+    const urls = prefs.playlist === DEFAULT_PLAYLIST ? [DEFAULT_PLAYLIST, MIRROR_PLAYLIST] : [prefs.playlist];
+    let lastErr;
+    channels = [];
+    for (const url of urls) {
+      try {
+        channels = parseM3U(await fetchText(url));
+        if (channels.length) break;
+        lastErr = new Error('no channels found in playlist');
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    loading = false;
+    if (!channels.length) {
       countEl.textContent = '';
+      const retry = el('button', { className: 'btn', textContent: 'Try again' });
+      retry.addEventListener('click', loadPlaylist);
       listEl.replaceChildren(el('li', { className: 'empty' },
-        `Couldn't load the playlist (${err.message}). Check your connection or the playlist URL in Settings.`));
+        `Couldn't download the channel list (${lastErr ? lastErr.message : 'unknown error'}). Check your internet connection and try again.`,
+        el('br'), el('br'), retry));
       return;
     }
     byUrl = new Map(channels.map((c) => [c.url, c]));
@@ -192,6 +233,7 @@
 
   // ---------- filtering & rendering ----------
   function applyFilters() {
+    if (loading) return;
     let base;
     if (prefs.tab === 'fav') base = channels.filter((c) => favorites.has(c.url));
     else if (prefs.tab === 'recent') base = recent.map((u) => byUrl.get(u)).filter(Boolean);

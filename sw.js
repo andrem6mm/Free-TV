@@ -1,6 +1,6 @@
 // Free TV service worker: caches the app shell and the last playlist so the app
 // opens instantly and still lists channels when the playlist host is unreachable.
-const VERSION = 'freetv-v1';
+const VERSION = 'freetv-v2';
 const SHELL = [
   './',
   'index.html',
@@ -14,7 +14,7 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
@@ -30,31 +30,36 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // Playlists: network first, fall back to the last copy we saw.
+  // Playlists: answer from the saved copy right away (if there is one) and refresh it
+  // in the background, so the app opens fast; the first visit waits for the network.
   if (url.pathname.endsWith('.m3u')) {
     event.respondWith(
-      fetch(req)
-        .then((res) => {
-          if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req.url, copy)); }
-          return res;
-        })
-        .catch(() => caches.match(req.url).then((hit) => hit || Response.error())),
+      caches.open(VERSION).then((cache) => cache.match(req.url).then((hit) => {
+        const net = fetch(req.url)
+          .then((res) => {
+            if (res.ok) cache.put(req.url, res.clone());
+            return res;
+          });
+        if (hit) {
+          event.waitUntil(net.catch(() => {}));
+          return hit;
+        }
+        return net;
+      })),
     );
     return;
   }
 
-  // App shell: stale-while-revalidate for same-origin files. Streams and logos pass through.
+  // App files: network first so updates show up right away, cached copy when offline.
+  // Streams and logos from other sites pass straight through.
   if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(req).then((hit) => {
-        const net = fetch(req)
-          .then((res) => {
-            if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); }
-            return res;
-          })
-          .catch(() => hit);
-        return hit || net;
-      }),
+      fetch(req)
+        .then((res) => {
+          if (res.ok) { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); }
+          return res;
+        })
+        .catch(() => caches.match(req).then((hit) => hit || Response.error())),
     );
   }
 });
